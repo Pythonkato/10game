@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>10 Game — DecaMerge (Circles + Belts) v5.0</title>
-<meta name="theme-color" content="#F4F1EA">
+<title>10 Game — DecaMerge (Runway v5.1)</title>
+<meta name="theme-color" content="#F6F5F3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAukB9Wj1nZkAAAAASUVORK5CYII=">
@@ -12,12 +12,12 @@
 <!-- Manifest (inline) -->
 <script type="application/manifest+json">
 {
-  "name": "10 Game — DecaMerge (Circles + Belts)",
+  "name": "10 Game — DecaMerge (Runway)",
   "short_name": "10 Game",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#F4F1EA",
-  "theme_color": "#F4F1EA",
+  "background_color": "#F6F5F3",
+  "theme_color": "#F6F5F3",
   "icons": [
     {"src":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAukB9Wj1nZkAAAAASUVORK5CYII=","sizes":"192x192","type":"image/png"}
   ]
@@ -26,47 +26,87 @@
 
 <style>
   :root{
-    --bg:#F4F1EA; --paper:#FFFFFF; --ink:#131313; --muted:#6D7280; --line:#E5DED2; --chip:#FBF8F2;
-    --accent:#1554F6;
-    --n1:#EB6A5E; --n2:#EE8E5E; --n3:#F0C95E; --n4:#79C5AE; --n5:#A7D5FF;
-    --n6:#7CB0F2; --n7:#B6A2E7; --n8:#F28BC4; --n9:#D3A760;
-    --b10:#3AB272; --b20:#2A8FBD; --b40:#7A66D9; --b80:#E05C80; --b160:#D48B26; --b320:#3B78D8; --b640:#2F9F66;
-    --belt:#EAE5DA;
+    /* Paris Runway palette: エクリュ／アイボリー／インク／シルバー */
+    --bg:#F6F5F3; --paper:#FFFFFF; --ink:#111; --muted:#6D6D70; --line:#E6E3DE; --chip:#FCFAF7;
+    --accent:#111; /* 黒で締める（ハイファッションのポスター調） */
+
+    /* 1〜9（ニュートラルで上品に） */
+    --n1:#D39F8A; --n2:#D7B18A; --n3:#D9C78A; --n4:#AFC7B7; --n5:#BFD5E8;
+    --n6:#AEBEE0; --n7:#C2B6DE; --n8:#D9A8C6; --n9:#C6B18B;
+
+    /* 10+（控えめなトーン差） */
+    --b10:#2E2E2E; --b20:#3A3A3A; --b40:#4A4A4A; --b80:#595959; --b160:#6A6A6A; --b320:#7B7B7B; --b640:#8C8C8C;
   }
   *{box-sizing:border-box}
   html,body{
     height:100%; margin:0; color:var(--ink);
-    background:radial-gradient(1200px 600px at 50% -10%,#FFF,#F4F1EA 55%);
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue","Segoe UI",Roboto,"Noto Sans JP",Arial,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #FFF, var(--bg) 55%),
+      linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0) 120px);
+    font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+      "Helvetica Neue", "Segoe UI", Roboto, "Noto Sans JP", Arial, sans-serif;
   }
   #wrap{min-height:100%;display:flex;flex-direction:column}
-  header{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:baseline;gap:10px}
-  .ttl{font-weight:800;letter-spacing:.02em}
-  .sub{color:var(--muted);font-size:12px;letter-spacing:.04em}
-  .chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .chip{background:var(--chip);border:1px solid var(--line);padding:8px 10px;border-radius:12px}
-  .btn{border:1px solid var(--line);padding:8px 12px;border-radius:12px;background:#fff;font-weight:700}
-  .btn.strong{border-color:transparent;background:#111;color:#fff}
+
+  header{
+    padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line)
+  }
+  .brand{display:flex;align-items:baseline;gap:14px}
+  .ttl{
+    letter-spacing:.18em; text-transform:uppercase; font-weight:800; font-size:18px;
+  }
+  .sub{
+    color:var(--muted); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+  }
+
+  .chips{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .chip{background:var(--chip);border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-variant-numeric:tabular-nums}
+  .btn{
+    border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff;font-weight:700;letter-spacing:.08em;
+  }
+  .btn.strong{
+    border-color:var(--ink);background:var(--ink);color:#fff;
+  }
   .btn.ghost{background:#fff}
   .btn:disabled{opacity:.45}
-  .nextBadge{display:flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border-radius:14px;padding:8px 12px;font-weight:800}
-  .nextBubble{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:18px}
+
+  .nextBadge{
+    display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);color:var(--ink);
+    border-radius:999px;padding:8px 12px;font-weight:800;letter-spacing:.08em
+  }
+  .nextBubble{
+    width:36px;height:36px;border-radius:50%;
+    background:conic-gradient(from 210deg, rgba(0,0,0,.08), rgba(0,0,0,0) 45%);
+    display:grid;place-items:center;font-size:18px;border:1px solid var(--line)
+  }
 
   #stage{flex:1;display:flex;align-items:center;justify-content:center;padding:14px}
-  canvas{touch-action:none;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.06)}
+  canvas{
+    touch-action:none;background:var(--paper);border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 10px 48px rgba(0,0,0,.06)
+  }
 
-  footer{padding:10px 14px;border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center}
+  footer{
+    padding:12px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center;
+    letter-spacing:.02em
+  }
 
-  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
-    background:#111;color:#fff;border-radius:10px;padding:10px 14px;opacity:0;transition:.25s}
+  .toast{
+    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+    background:#111;color:#fff;border-radius:999px;padding:10px 14px;opacity:0;transition:.25s;
+    letter-spacing:.04em
+  }
   .toast.show{opacity:1}
 
-  /* Help modal */
-  #help{position:fixed;inset:0;background:rgba(0,0,0,.38);display:none;align-items:center;justify-content:center;padding:18px}
+  /* Help modal — モノトーン紙面風 */
+  #help{position:fixed;inset:0;background:rgba(0,0,0,.36);display:none;align-items:center;justify-content:center;padding:18px}
   #help[open]{display:flex}
-  #help .card{width:min(560px,92vw);background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
-  #help h3{margin:.2em 0 .6em;font-size:18px}
+  #help .card{width:min(560px,92vw);background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
+  #help h3{
+    margin:.2em 0 .6em;font-size:18px;letter-spacing:.12em;text-transform:uppercase;
+    font-family: "Bodoni Moda","Didot","Times New Roman",serif;font-weight:700
+  }
   #help ol{padding-left:1.1em;line-height:1.6}
   #help li{margin:.35em 0}
   #help .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
@@ -76,13 +116,13 @@
 <div id="wrap">
   <header>
     <div class="brand">
-      <div class="ttl">10 Game</div>
-      <div class="sub">DecaMerge — 足して10 → 10→20→40…（丸＋コンベア）</div>
+      <div class="ttl">10 GAME</div>
+      <div class="sub">DecaMerge — Circles + Belts / Runway</div>
     </div>
     <div class="chips">
       <div class="chip">Score: <b id="score">0</b> / Best: <b id="best">0</b></div>
       <div class="nextBadge">
-        Next
+        NEXT
         <div class="nextBubble" id="nextA">-</div>
         <div class="nextBubble" id="nextB">-</div>
       </div>
@@ -98,20 +138,20 @@
   </div>
 
   <footer>
-    指で<strong>左右にスライド</strong>→<strong>指を離す</strong>と投入。<br>
-    <b>1〜9</b>は<strong>合計=10</strong>で<strong>即合体</strong>（2〜6個／複数同時）。<b>同じ大オーブ</b>は<b>倍々合体</b>！
+    指で<strong>左右にスライド</strong>→<strong>指を離す</strong>で投入。<br>
+    <b>1〜9</b>は<strong>合計=10</strong>で合体（2〜6個／複数同時）。<b>同じ大オーブ</b>は<b>倍々合体</b>。
   </footer>
 </div>
 
 <!-- How-to -->
 <div id="help" role="dialog" aria-modal="true" aria-label="遊び方">
   <div class="card">
-    <h3>🎮 遊び方（Circles + Belts）</h3>
+    <h3>HOW TO PLAY</h3>
     <ol>
-      <li>画面上で指を<strong>左右にスライド</strong>して狙いを合わせ、<strong>指を離す</strong>と投入。</li>
-      <li><strong>1〜9</strong>が<strong>隣り合うグループ</strong>で<strong>合計=10</strong>なら、<strong>即「10」</strong>に合体（2〜6個、複数同時OK）。</li>
-      <li><strong>10,20,40…</strong>は<strong>同じ値どうし</strong>が<strong>接触</strong>で<strong>倍々合体</strong>。</li>
-      <li>盤面には<strong>コンベア帯</strong>（右向き矢印＝右へ、左向き矢印＝左へ）と弱い<strong>そよ風</strong>があります。</li>
+      <li>狙って左右にスライド → 指を離すと投入。</li>
+      <li><strong>1〜9</strong>の隣接グループで<strong>合計=10</strong>なら即「10」に合体（2〜6個／複数同時OK）。</li>
+      <li><strong>10,20,40…</strong>は<strong>同値接触</strong>で<strong>倍々合体</strong>。</li>
+      <li>盤面にはコンベア帯（→/←）と弱いそよ風があります。</li>
       <li>赤線より上に一定時間あると<b>ゲームオーバー</b>（投入直後0.45秒は無視）。</li>
     </ol>
     <div class="actions">
@@ -125,36 +165,15 @@
 
 <script>
 /* =========================
-   CONFIG: 1〜9の出現率（重み）
-   - 任意の正数/小数OK。合計は自動で正規化。
-   - 0にすると出現しません。
-   - 例）1:6 は「重み=6」という意味で、相対比率で抽選します。
-   - 要望により 6,7,8,9 は 0。
+   CONFIG
+   - “実際の比率”：面積 ∝ 値 ⇒ 直径 ∝ √(値)
+   - 旧版の DMAX 上限を撤廃し、40/80/160/320/640/1280 を正しく大型化。
+   - 超巨大オーブは横幅を超えることがあるため、spawn/壁処理をケア。
    ========================= */
 const CONFIG = {
-  spawnWeights: { 1:6, 2:8, 3:11, 4:13, 5:15, 6:0, 7:0, 8:0, 9:0 }
+  spawnWeights: { 1:6, 2:8, 3:11, 4:13, 5:15, 6:0, 7:0, 8:0, 9:0 },
+  baseDFor10: 54  // 10の見た目直径（旧56に近い。ここを上げれば全体が大きくなります）
 };
-
-/* 画像素材は使いません（既存IP/果物を避けるため） */
-
-/* 重みテーブルからランダムピッカーを生成 */
-function makeRandomPicker(weights){
-  const table = [];
-  let total = 0;
-  for (let v=1; v<=9; v++){
-    const w = Math.max(0, Number(weights[v] ?? 0));
-    table.push({v, w}); total += w;
-  }
-  if (total <= 0){ table.forEach(t => t.w = 1); total = 9; }
-  let acc = 0;
-  for (const row of table){ acc += row.w; row.cum = acc / total; }
-  return function pick(){
-    const r = Math.random();
-    for (const row of table){ if (r < row.cum) return row.v; }
-    return 9;
-  };
-}
-const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
 
 // ===========================================================
 (()=>{
@@ -187,6 +206,7 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
   const W = cv.width, H = cv.height;
   const LEFT = 22, RIGHT = W-22, FLOOR = H-14, CEIL = 80; // 赤線
   const BOARD_TOP = 6, BOARD_LEFT = LEFT, BOARD_RIGHT = RIGHT, BOARD_BOTTOM = FLOOR;
+  const BOARD_W = RIGHT - LEFT;
 
   const DT = 1/60, SUBSTEPS = 3, ITER = 3;
   const G = 1850;
@@ -198,7 +218,7 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
   const MAX_TILES  = 95;
   const ROT_MAX = 0.11;
 
-  // --- Conveyor belts ---
+  // Belts
   const BELTS = [
     { y: 200, t: 12, v: +160 },
     { y: 340, t: 12, v: -160 },
@@ -235,28 +255,39 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
     return CSS('--b10');
   }
 
-  // 半径スケール（四角版の halfFor を円半径に流用）
-  const D10 = 56, DMAX = 120; // “見た目の直径”相当
+  /* ===== “実比率”スケール =====
+     面積 ∝ 値 ⇒ 直径 d = baseDFor10 * sqrt(val/10)
+     ※ 上限は付けない（旧DMAX撤廃）。 */
   function halfFor(val){
-    const d = Math.min(D10 * Math.sqrt(Math.max(val,1)/10), DMAX);
-    return d/2; // 円の半径として使用
+    const d = CONFIG.baseDFor10 * Math.sqrt(Math.max(val,1)/10);
+    return d/2;
   }
-  function massFor(r){ return Math.PI * r * r; } // 面積ベース
+  function massFor(r){ return Math.PI * r * r; }
 
+  // spawn weights
+  function makeRandomPicker(weights){
+    const table = []; let total = 0;
+    for (let v=1; v<=9; v++){ const w = Math.max(0, Number(weights[v] ?? 0)); table.push({v, w}); total += w; }
+    if (total <= 0){ table.forEach(t => t.w = 1); total = 9; }
+    let acc = 0; for (const row of table){ acc += row.w; row.cum = acc / total; }
+    return function pick(){ const r = Math.random(); for (const row of table){ if (r < row.cum) return row.v; } return 9; };
+  }
+  const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
   function randSmall(){ return pickSmall(); }
   function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
   function updateHUD(){
     scoreEl.textContent = score|0;
-    const best = +(localStorage.getItem('decamerge_best_circle_belt_v50')||0);
-    if (score>best) localStorage.setItem('decamerge_best_circle_belt_v50', score|0);
-    bestEl.textContent = localStorage.getItem('decamerge_best_circle_belt_v50')||0;
+    const best = +(localStorage.getItem('decamerge_best_circle_belt_runway_v51')||0);
+    if (score>best) localStorage.setItem('decamerge_best_circle_belt_runway_v51', score|0);
+    bestEl.textContent = localStorage.getItem('decamerge_best_circle_belt_runway_v51')||0;
     nextAEl.textContent = nextQ[0];
     nextBEl.textContent = nextQ[1];
     hintBtn.textContent = showHint ? 'ヒント OFF' : 'ヒント ON';
     undoBtn.disabled = !undoState;
   }
 
-  // ===== modal open/close =====
+  // ===== modal =====
   function resetPointerState(){
     try { if (activePointer!==null) cv.releasePointerCapture(activePointer); } catch(e){}
     dragging=false; activePointer=null;
@@ -268,9 +299,11 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
   okHelp.addEventListener('click', closeHelpModal);
   helpModal.addEventListener('click', (e)=>{ if (e.target===helpModal) closeHelpModal(); });
   addEventListener('keydown', (e)=>{ if (e.key==='Escape' && helpOpen) closeHelpModal(); });
-  if (!localStorage.getItem('decamerge_seen_help_circlebelt_v50')) { openHelp(); localStorage.setItem('decamerge_seen_help_circlebelt_v50','1'); }
+  if (!localStorage.getItem('decamerge_seen_help_circlebelt_runway_v51')) {
+    openHelp(); localStorage.setItem('decamerge_seen_help_circlebelt_runway_v51','1');
+  }
 
-  // ===== pointer inputs =====
+  // ===== pointer =====
   function canvasX(e){
     const rect = cv.getBoundingClientRect();
     const clientX = e.clientX ?? (e.touches && e.touches[0].clientX) ?? rect.left;
@@ -304,7 +337,7 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
   hintBtn.addEventListener('click', ()=>{ showHint = !showHint; updateHUD(); });
   undoBtn.addEventListener('click', undo);
 
-  // ===== game control =====
+  // ===== control =====
   function reset(){
     tiles = []; rings = []; score=0; over=false; cooldown=0; dangerTime=0; gameTime=0;
     aimX=(LEFT+RIGHT)/2; nextQ=[randSmall(), randSmall()]; undoState=null;
@@ -327,19 +360,29 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
     undoState = snapshot();
     const val = nextQ.shift(); nextQ.push(randSmall());
     const r = halfFor(val);
-    const x = clamp(aimX, LEFT+r+1, RIGHT-r-1);
+    // 超大型（幅を超える）なら中央に落とす
+    const MAX_R_FIT = (BOARD_W - 4) / 2;
+    const x = (r > MAX_R_FIT) ? (LEFT+RIGHT)/2 : clamp(aimX, LEFT+r+1, RIGHT-r-1);
     tiles.push({x, y: CEIL-30, vx:0, vy:0, h:r, val, id:idSeq++, m:massFor(r), born:gameTime, rot:0});
     score += val; cooldown = .18; updateHUD();
   }
 
-  // ===== physics helpers（円） =====
+  // ===== physics (circles) =====
   const CONTACT_TOL_SMALL = 7;
   const BIG_MERGE_TOL     = 3;
 
   function keepInside(t){
     const BOUND_SLOP = 0.5;
-    if (t.x - t.h < LEFT+BOUND_SLOP){ t.x = LEFT+BOUND_SLOP + t.h; t.vx = Math.max(t.vx,0)*(-REST_WALL); }
-    if (t.x + t.h > RIGHT-BOUND_SLOP){ t.x = RIGHT-BOUND_SLOP - t.h; t.vx = -Math.max(-t.vx,0)*REST_WALL; }
+
+    // 幅を越えるほど巨大な場合：中央固定寄りに（暴走防止）
+    if (t.h*2 > BOARD_W - 2){
+      t.x = (LEFT+RIGHT)/2;
+      t.vx = 0;
+    }else{
+      if (t.x - t.h < LEFT+BOUND_SLOP){ t.x = LEFT+BOUND_SLOP + t.h; t.vx = Math.max(t.vx,0)*(-REST_WALL); }
+      if (t.x + t.h > RIGHT-BOUND_SLOP){ t.x = RIGHT-BOUND_SLOP - t.h; t.vx = -Math.max(-t.vx,0)*REST_WALL; }
+    }
+
     if (t.y + t.h > FLOOR-BOUND_SLOP){
       t.y = FLOOR-BOUND_SLOP - t.h;
       if (Math.abs(t.vy) < 40) t.vy = 0; else t.vy = -t.vy * REST_FLOOR;
@@ -358,7 +401,6 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
           const minDist = A.h + B.h;
           const overlap = minDist - dist;
           if (overlap>0){
-            // 法線
             let nx=1, ny=0;
             if (dist>0){ nx=dx/dist; ny=dy/dist; }
             const imA = 1/A.m, imB = 1/B.m, inv = imA+imB;
@@ -366,7 +408,6 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
             const pushB = (imB/inv)*overlap;
             A.x -= nx*pushA; A.y -= ny*pushA;
             B.x += nx*pushB; B.y += ny*pushB;
-            // 反発（法線成分のみ）
             const rvx=B.vx-A.vx, rvy=B.vy-A.vy;
             const vn=rvx*nx + rvy*ny;
             if (vn<0){
@@ -382,18 +423,16 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
   }
   function relaxWorld(n=4){ for(let i=0;i<n;i++) resolvePairs(); }
 
-  // ===== physics step =====
+  // ===== step =====
   function step(dt){
     gameTime += dt;
     cooldown = Math.max(0, cooldown-dt);
 
     const breeze = BREEZE.amp * Math.sin(gameTime*BREEZE.speed);
 
-    // integrate
     for (const t of tiles){
       t.vy += G*dt;
 
-      // belts（円の底が帯の範囲なら）
       const bottom = t.y + t.h;
       for (const b of BELTS){
         if (bottom > b.y - b.t && bottom < b.y + b.t){
@@ -402,10 +441,8 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
         }
       }
 
-      // breeze
       t.vx += breeze * dt * 0.12;
 
-      // damping
       t.vx *= AIR_FRICTION; t.vy *= AIR_FRICTION;
       t.vx = clamp(t.vx, -VX_MAX, VX_MAX);
       t.vy = clamp(t.vy, -VY_MAX, VY_MAX);
@@ -414,22 +451,18 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
 
       keepInside(t);
 
-      // 小さな傾き（演出用、円でもOK）
       const target = clamp(t.vx/620, -ROT_MAX, ROT_MAX);
       t.rot += (target - t.rot) * 0.12;
     }
 
     resolvePairs();
 
-    // merges
     let changed, pass=0; do{ changed = tryMerges(); pass++; } while(changed && pass<16);
     if (changed) relaxWorld(4);
 
-    // fx
     for (const r of rings){ r.t += dt; }
     rings = rings.filter(r=>r.t<0.9);
 
-    // game over
     const AGE_SAFE = 0.45, MARGIN = 1;
     let danger=false;
     for (const t of tiles){
@@ -440,7 +473,7 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
     if (dangerTime > 0.70 && !over){ over=true; toast('GAME OVER! 元に戻す or リセット'); }
   }
 
-  // ===== merging rules（円距離） =====
+  // ===== merge =====
   function touchingSmall(a,b){
     const d = Math.hypot(b.x-a.x, b.y-a.y);
     return d <= (a.h + b.h + CONTACT_TOL_SMALL);
@@ -472,7 +505,7 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
     }
     if (removedBig.size){ tiles = tiles.filter(t=>!removedBig.has(t.id)); updateHUD(); }
 
-    // 小オーブ：合計=10（2〜6個、同フレーム複数）
+    // 小オーブ：合計=10
     const small = tiles.filter(t=>t.val<10);
     if (small.length){
       const adj = small.map(()=>[]);
@@ -485,7 +518,6 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
 
       for (let s=0;s<small.length;s++){
         if (visited[s]) continue;
-        // 成分抽出
         const comp=[]; const q=[s]; visited[s]=true;
         while(q.length){ const v=q.shift(); comp.push(v); for (const nb of adj[v]) if(!visited[nb]){visited[nb]=true;q.push(nb);} }
         if (comp.length<2) continue;
@@ -496,7 +528,6 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
         while(true){
           let picked=null;
           const sorted = [...avail].sort((ia,ib)=>small[ib].val-small[ia].val);
-
           function findK(k){
             const arr=sorted, n=arr.length; let res=null;
             function dfs(st, need, sum, ps){
@@ -511,16 +542,12 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
             }
             return dfs(0,k,0,[]) ? res : null;
           }
-
           for (const k of [2,3,4,5,6]){ if (avail.length>=k){ const res=findK(k); if (res){ picked=res; break; } } }
-
           if (picked){
             chosenSets.push(picked);
             const setPicked = new Set(picked);
             avail = avail.filter(i=>!setPicked.has(i));
-          }else{
-            break;
-          }
+          }else break;
         }
 
         for (const picked of chosenSets){
@@ -544,24 +571,23 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
         updateHUD();
       }
     }
-
     return changed;
   }
 
-  // ===== rendering =====
+  // ===== rendering (Runway) =====
   function draw(){
     ctx.clearRect(0,0,W,H);
 
-    // 外枠
-    ctx.strokeStyle = CSS('--line'); ctx.lineWidth = 2;
-    roundedRectPath(LEFT-8, 6, RIGHT-LEFT+16, FLOOR-6, 16); ctx.stroke();
+    // 外枠（ヘアライン）
+    ctx.strokeStyle = CSS('--line'); ctx.lineWidth = 1.5;
+    roundedRectPath(LEFT-8, 6, RIGHT-LEFT+16, FLOOR-6, 18); ctx.stroke();
 
     // 盤面内クリップ
     ctx.save(); ctx.beginPath();
     ctx.rect(BOARD_LEFT, BOARD_TOP, BOARD_RIGHT-BOARD_LEFT, BOARD_BOTTOM-BOARD_TOP);
     ctx.clip();
 
-    // コンベア帯
+    // コンベア帯（より繊細に）
     for (const b of BELTS) drawBelt(b.y, b.t, b.v>0?1:-1);
 
     // 赤線
@@ -570,16 +596,16 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
 
     // ゴースト
     const rN = halfFor(nextQ[0]);
-    const ax = clamp(aimX, LEFT+rN+1, RIGHT-rN-1);
-    ctx.globalAlpha=.28; drawOrb(ax, CEIL-28, rN, nextQ[0], 0); ctx.globalAlpha=1;
+    const ax = (rN > (BOARD_W-4)/2) ? (LEFT+RIGHT)/2 : clamp(aimX, LEFT+rN+1, RIGHT-rN-1);
+    ctx.globalAlpha=.26; drawOrb(ax, CEIL-28, rN, nextQ[0], 0); ctx.globalAlpha=1;
 
-    // タイル（オーブ）
+    // オーブ
     for (const t of tiles) drawOrb(t.x,t.y,t.h,t.val,t.rot);
 
-    // 合体リング（円）
+    // 合体リング（繊細な円）
     for (const rr of rings){
       ctx.globalAlpha = Math.max(0, 1 - rr.t*1.1);
-      ctx.strokeStyle = rr.col; ctx.lineWidth = 3;
+      ctx.strokeStyle = rr.col; ctx.lineWidth = 2.2;
       const r = 8 + rr.t*42;
       ctx.beginPath(); ctx.arc(rr.x, rr.y, r, 0, Math.PI*2); ctx.stroke();
       ctx.globalAlpha = 1;
@@ -590,62 +616,56 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
     if (over){
       ctx.fillStyle = 'rgba(0,0,0,.48)'; ctx.fillRect(0,0,W,H);
       ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.font='bold 32px system-ui'; ctx.fillText('GAME OVER', W/2, H*0.42);
-      ctx.font='16px system-ui'; ctx.fillText('「元に戻す」または「リセット」', W/2, H*0.58);
+      ctx.font='700 30px "Bodoni Moda","Didot","Times New Roman",serif';
+      ctx.fillText('GAME OVER', W/2, H*0.42);
+      ctx.font='600 15px ui-sans-serif, "Noto Sans JP", system-ui';
+      ctx.fillText('「元に戻す」または「リセット」', W/2, H*0.58);
     }
   }
 
   function drawBelt(y, t, dir){
-    ctx.fillStyle = 'rgba(234,229,218,0.55)';
+    ctx.fillStyle = 'rgba(0,0,0,0.03)';
     ctx.fillRect(LEFT+1, y-t, RIGHT-LEFT-2, t*2);
     ctx.save(); ctx.translate(0, y);
-    ctx.fillStyle = 'rgba(0,0,0,0.08)';
-    for (let x=LEFT+10; x<RIGHT-10; x+=30){
+    ctx.fillStyle = 'rgba(0,0,0,0.10)';
+    for (let x=LEFT+14; x<RIGHT-14; x+=30){
       ctx.beginPath();
-      if (dir>0){ // →
-        ctx.moveTo(x-6, -4); ctx.lineTo(x+6, 0); ctx.lineTo(x-6, 4);
-      }else{      // ←
-        ctx.moveTo(x+6, -4); ctx.lineTo(x-6, 0); ctx.lineTo(x+6, 4);
-      }
+      if (dir>0){ ctx.moveTo(x-6, -3); ctx.lineTo(x+6, 0); ctx.lineTo(x-6, 3); }
+      else      { ctx.moveTo(x+6, -3); ctx.lineTo(x-6, 0); ctx.lineTo(x+6, 3); }
       ctx.closePath(); ctx.fill();
     }
     ctx.restore();
   }
 
-  // 円オーブ描画（放射グラデ＋ハイライト）
+  // “Runway”質感のオーブ（モノトーン／ハイライト最小）
   function drawOrb(x,y,r,val,rot){
     ctx.save(); ctx.translate(x,y); ctx.rotate(rot||0);
 
-    // 本体グラデ
-    const g = ctx.createRadialGradient(-r*0.3, -r*0.3, r*0.2, 0, 0, r);
+    // 本体（内側から僅かに光らせる）
+    const g = ctx.createRadialGradient(-r*0.28, -r*0.28, r*0.18, 0, 0, r);
     const base = val<10 ? colorSmall(val) : colorBig(val);
-    g.addColorStop(0, '#fff');
+    g.addColorStop(0, '#FFFFFF');
     g.addColorStop(1, base);
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
 
-    // 外枠
-    ctx.strokeStyle='rgba(0,0,0,.12)'; ctx.lineWidth=2;
-    ctx.beginPath(); ctx.arc(0,0,r-1,0,Math.PI*2); ctx.stroke();
+    // 外枠（極細）
+    ctx.strokeStyle='rgba(0,0,0,.14)'; ctx.lineWidth=1.8;
+    ctx.beginPath(); ctx.arc(0,0,r-0.6,0,Math.PI*2); ctx.stroke();
 
-    // ハイライト
-    ctx.globalAlpha=0.22; ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.ellipse(-r*0.35, -r*0.35, r*0.55, r*0.35, -0.6, 0, Math.PI*2); ctx.fill();
-    ctx.globalAlpha=1;
-
-    // 数字
+    // 数字（Didone系優先）
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    const fontPx = Math.floor(r*1.16);
-    ctx.font = 'bold '+fontPx+'px system-ui';
-    // 読みやすさ用の縁取り
-    ctx.lineWidth = Math.max(2, r*0.18);
+    const fontPx = Math.floor(r*1.12);
+    ctx.font = '700 '+fontPx+'px "Bodoni Moda","Didot","Times New Roman",serif';
+    // 細い白縁で読みやすく
+    ctx.lineWidth = Math.max(1.8, r*0.16);
     ctx.strokeStyle = 'rgba(255,255,255,0.92)';
     ctx.strokeText(val, 0, 1);
     ctx.fillStyle='#111';
     ctx.fillText(val, 0, 1);
 
     if (showHint && val<10){
-      ctx.fillStyle='rgba(0,0,0,.35)'; ctx.font=Math.floor(r*0.6)+'px system-ui';
+      ctx.fillStyle='rgba(0,0,0,.34)'; ctx.font=Math.floor(r*0.58)+'px ui-sans-serif, "Noto Sans JP"';
       ctx.fillText(10-val, 0, -r*1.1);
     }
     ctx.restore();
@@ -657,7 +677,7 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
     ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
   }
 
-  // ===== main loop =====
+  // ===== main =====
   function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 1300); }
   let acc=0, last=performance.now();
   function loop(now){
@@ -677,7 +697,7 @@ const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
 <script>
 if ('serviceWorker' in navigator) {
   const code = `
-    const CACHE='10game-decamerge-v50-circlebelt';
+    const CACHE='10game-decamerge-runway-v51';
     self.addEventListener('install',e=>{
       e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
       self.skipWaiting();
