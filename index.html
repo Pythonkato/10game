@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>10 Game — DecaMerge (Runway v5.1)</title>
+<title>10 Game — DecaMerge (Runway v5.2-fixed)</title>
 <meta name="theme-color" content="#F6F5F3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -26,15 +26,14 @@
 
 <style>
   :root{
-    /* Paris Runway palette: エクリュ／アイボリー／インク／シルバー */
+    /* Paris Runway palette */
     --bg:#F6F5F3; --paper:#FFFFFF; --ink:#111; --muted:#6D6D70; --line:#E6E3DE; --chip:#FCFAF7;
-    --accent:#111; /* 黒で締める（ハイファッションのポスター調） */
 
-    /* 1〜9（ニュートラルで上品に） */
+    /* 1〜9：上品なニュートラル */
     --n1:#D39F8A; --n2:#D7B18A; --n3:#D9C78A; --n4:#AFC7B7; --n5:#BFD5E8;
     --n6:#AEBEE0; --n7:#C2B6DE; --n8:#D9A8C6; --n9:#C6B18B;
 
-    /* 10+（控えめなトーン差） */
+    /* 10+：モノトーン階調 */
     --b10:#2E2E2E; --b20:#3A3A3A; --b40:#4A4A4A; --b80:#595959; --b160:#6A6A6A; --b320:#7B7B7B; --b640:#8C8C8C;
   }
   *{box-sizing:border-box}
@@ -53,21 +52,13 @@
     border-bottom:1px solid var(--line)
   }
   .brand{display:flex;align-items:baseline;gap:14px}
-  .ttl{
-    letter-spacing:.18em; text-transform:uppercase; font-weight:800; font-size:18px;
-  }
-  .sub{
-    color:var(--muted); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
-  }
+  .ttl{letter-spacing:.18em;text-transform:uppercase;font-weight:800;font-size:18px}
+  .sub{color:var(--muted);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
 
   .chips{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .chip{background:var(--chip);border:1px solid var(--line);padding:8px 12px;border-radius:999px;font-variant-numeric:tabular-nums}
-  .btn{
-    border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff;font-weight:700;letter-spacing:.08em;
-  }
-  .btn.strong{
-    border-color:var(--ink);background:var(--ink);color:#fff;
-  }
+  .btn{border:1px solid var(--line);padding:8px 14px;border-radius:999px;background:#fff;font-weight:700;letter-spacing:.08em}
+  .btn.strong{border-color:var(--ink);background:var(--ink);color:#fff}
   .btn.ghost{background:#fff}
   .btn:disabled{opacity:.45}
 
@@ -82,31 +73,20 @@
   }
 
   #stage{flex:1;display:flex;align-items:center;justify-content:center;padding:14px}
-  canvas{
-    touch-action:none;background:var(--paper);border:1px solid var(--line);border-radius:18px;
-    box-shadow:0 10px 48px rgba(0,0,0,.06)
-  }
+  canvas{touch-action:none;background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 48px rgba(0,0,0,.06)}
 
-  footer{
-    padding:12px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center;
-    letter-spacing:.02em
-  }
+  footer{padding:12px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center;letter-spacing:.02em}
 
-  .toast{
-    position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
-    background:#111;color:#fff;border-radius:999px;padding:10px 14px;opacity:0;transition:.25s;
-    letter-spacing:.04em
-  }
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+    background:#111;color:#fff;border-radius:999px;padding:10px 14px;opacity:0;transition:.25s;letter-spacing:.04em}
   .toast.show{opacity:1}
 
-  /* Help modal — モノトーン紙面風 */
+  /* Help modal */
   #help{position:fixed;inset:0;background:rgba(0,0,0,.36);display:none;align-items:center;justify-content:center;padding:18px}
   #help[open]{display:flex}
   #help .card{width:min(560px,92vw);background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px}
-  #help h3{
-    margin:.2em 0 .6em;font-size:18px;letter-spacing:.12em;text-transform:uppercase;
-    font-family: "Bodoni Moda","Didot","Times New Roman",serif;font-weight:700
-  }
+  #help h3{margin:.2em 0 .6em;font-size:18px;letter-spacing:.12em;text-transform:uppercase;
+    font-family:"Bodoni Moda","Didot","Times New Roman",serif;font-weight:700}
   #help ol{padding-left:1.1em;line-height:1.6}
   #help li{margin:.35em 0}
   #help .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
@@ -165,17 +145,28 @@
 
 <script>
 /* =========================
-   CONFIG
-   - “実際の比率”：面積 ∝ 値 ⇒ 直径 ∝ √(値)
-   - 旧版の DMAX 上限を撤廃し、40/80/160/320/640/1280 を正しく大型化。
-   - 超巨大オーブは横幅を超えることがあるため、spawn/壁処理をケア。
+   実比率（面積 ∝ 値 ⇒ 直径 ∝ √値）＋自動スケール
+   - 1280 が盤面に必ず収まるよう S を自動調整
+   - 巨大球の投下＆境界処理を堅牢化
    ========================= */
 const CONFIG = {
   spawnWeights: { 1:6, 2:8, 3:11, 4:13, 5:15, 6:0, 7:0, 8:0, 9:0 },
-  baseDFor10: 54  // 10の見た目直径（旧56に近い。ここを上げれば全体が大きくなります）
+  baseDFor10: 56,      // デフォルト基準（後で自動補正されることがあります）
+  maxRank: 1280,       // 想定最大（ここまでが盤面に収まるようにスケール）
+  marginForMax: 8      // 盤内に残す余白（px）
 };
 
-// ===========================================================
+/* 重みテーブルからランダムピッカー */
+function makeRandomPicker(weights){
+  const table = []; let total = 0;
+  for (let v=1; v<=9; v++){ const w = Math.max(0, Number(weights[v] ?? 0)); table.push({v, w}); total += w; }
+  if (total <= 0){ table.forEach(t => t.w = 1); total = 9; }
+  let acc = 0; for (const row of table){ acc += row.w; row.cum = acc / total; }
+  return function pick(){ const r = Math.random(); for (const row of table){ if (r < row.cum) return row.v; } return 9; };
+}
+const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
+const randSmall = ()=> pickSmall();
+
 (()=>{
   // ===== DOM =====
   const cv = document.getElementById('cv');
@@ -208,7 +199,7 @@ const CONFIG = {
   const BOARD_TOP = 6, BOARD_LEFT = LEFT, BOARD_RIGHT = RIGHT, BOARD_BOTTOM = FLOOR;
   const BOARD_W = RIGHT - LEFT;
 
-  const DT = 1/60, SUBSTEPS = 3, ITER = 3;
+  const DT = 1/60, SUBSTEPS = 3, ITER = 4;  // ITERを少し増やして安定化
   const G = 1850;
   const AIR_FRICTION = 0.975;
   const REST_FLOOR = 0.08;
@@ -218,13 +209,25 @@ const CONFIG = {
   const MAX_TILES  = 95;
   const ROT_MAX = 0.11;
 
-  // Belts
+  // Belts & Breeze
   const BELTS = [
     { y: 200, t: 12, v: +160 },
     { y: 340, t: 12, v: -160 },
     { y: 480, t: 12, v: +180 },
   ];
   const BREEZE = { amp: 110, speed: 0.7 };
+
+  // ===== dynamic scale for real ratios =====
+  let SCALE10 = CONFIG.baseDFor10;   // d for value=10
+  (function computeAutoScale(){
+    // 1280 の直径が盤面（−余白）に収まるよう補正
+    const allowed = BOARD_W - CONFIG.marginForMax;
+    const d1280 = SCALE10 * Math.sqrt(CONFIG.maxRank/10);
+    if (d1280 > allowed && d1280 > 0){
+      const k = allowed / d1280;
+      SCALE10 *= k;
+    }
+  })();
 
   // ===== game state =====
   /** @type {{x:number,y:number,vx:number,vy:number,h:number,val:number,id:number,m:number,born:number,rot:number}[]} */
@@ -255,39 +258,26 @@ const CONFIG = {
     return CSS('--b10');
   }
 
-  /* ===== “実比率”スケール =====
-     面積 ∝ 値 ⇒ 直径 d = baseDFor10 * sqrt(val/10)
-     ※ 上限は付けない（旧DMAX撤廃）。 */
+  // 実比率：直径 d = SCALE10 * √(val/10) （上限なしだが1280は盤面に収まるようSCALE10が自動調整済み）
   function halfFor(val){
-    const d = CONFIG.baseDFor10 * Math.sqrt(Math.max(val,1)/10);
+    const d = SCALE10 * Math.sqrt(Math.max(val,1)/10);
     return d/2;
   }
   function massFor(r){ return Math.PI * r * r; }
 
-  // spawn weights
-  function makeRandomPicker(weights){
-    const table = []; let total = 0;
-    for (let v=1; v<=9; v++){ const w = Math.max(0, Number(weights[v] ?? 0)); table.push({v, w}); total += w; }
-    if (total <= 0){ table.forEach(t => t.w = 1); total = 9; }
-    let acc = 0; for (const row of table){ acc += row.w; row.cum = acc / total; }
-    return function pick(){ const r = Math.random(); for (const row of table){ if (r < row.cum) return row.v; } return 9; };
-  }
-  const pickSmall = makeRandomPicker(CONFIG.spawnWeights);
-  function randSmall(){ return pickSmall(); }
   function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-
   function updateHUD(){
     scoreEl.textContent = score|0;
-    const best = +(localStorage.getItem('decamerge_best_circle_belt_runway_v51')||0);
-    if (score>best) localStorage.setItem('decamerge_best_circle_belt_runway_v51', score|0);
-    bestEl.textContent = localStorage.getItem('decamerge_best_circle_belt_runway_v51')||0;
+    const best = +(localStorage.getItem('decamerge_best_circle_belt_runway_v52')||0);
+    if (score>best) localStorage.setItem('decamerge_best_circle_belt_runway_v52', score|0);
+    bestEl.textContent = localStorage.getItem('decamerge_best_circle_belt_runway_v52')||0;
     nextAEl.textContent = nextQ[0];
     nextBEl.textContent = nextQ[1];
     hintBtn.textContent = showHint ? 'ヒント OFF' : 'ヒント ON';
     undoBtn.disabled = !undoState;
   }
 
-  // ===== modal =====
+  // ===== modal open/close =====
   function resetPointerState(){
     try { if (activePointer!==null) cv.releasePointerCapture(activePointer); } catch(e){}
     dragging=false; activePointer=null;
@@ -299,11 +289,11 @@ const CONFIG = {
   okHelp.addEventListener('click', closeHelpModal);
   helpModal.addEventListener('click', (e)=>{ if (e.target===helpModal) closeHelpModal(); });
   addEventListener('keydown', (e)=>{ if (e.key==='Escape' && helpOpen) closeHelpModal(); });
-  if (!localStorage.getItem('decamerge_seen_help_circlebelt_runway_v51')) {
-    openHelp(); localStorage.setItem('decamerge_seen_help_circlebelt_runway_v51','1');
+  if (!localStorage.getItem('decamerge_seen_help_circlebelt_runway_v52')) {
+    openHelp(); localStorage.setItem('decamerge_seen_help_circlebelt_runway_v52','1');
   }
 
-  // ===== pointer =====
+  // ===== pointer inputs =====
   function canvasX(e){
     const rect = cv.getBoundingClientRect();
     const clientX = e.clientX ?? (e.touches && e.touches[0].clientX) ?? rect.left;
@@ -337,7 +327,7 @@ const CONFIG = {
   hintBtn.addEventListener('click', ()=>{ showHint = !showHint; updateHUD(); });
   undoBtn.addEventListener('click', undo);
 
-  // ===== control =====
+  // ===== game control =====
   function reset(){
     tiles = []; rings = []; score=0; over=false; cooldown=0; dangerTime=0; gameTime=0;
     aimX=(LEFT+RIGHT)/2; nextQ=[randSmall(), randSmall()]; undoState=null;
@@ -360,22 +350,22 @@ const CONFIG = {
     undoState = snapshot();
     const val = nextQ.shift(); nextQ.push(randSmall());
     const r = halfFor(val);
-    // 超大型（幅を超える）なら中央に落とす
-    const MAX_R_FIT = (BOARD_W - 4) / 2;
+    const MAX_R_FIT = (BOARD_W - 4)/2;
     const x = (r > MAX_R_FIT) ? (LEFT+RIGHT)/2 : clamp(aimX, LEFT+r+1, RIGHT-r-1);
     tiles.push({x, y: CEIL-30, vx:0, vy:0, h:r, val, id:idSeq++, m:massFor(r), born:gameTime, rot:0});
     score += val; cooldown = .18; updateHUD();
   }
 
-  // ===== physics (circles) =====
+  // ===== physics helpers（円） =====
   const CONTACT_TOL_SMALL = 7;
   const BIG_MERGE_TOL     = 3;
 
   function keepInside(t){
     const BOUND_SLOP = 0.5;
+    const MAX_R_FIT = (BOARD_W - 2)/2;
 
-    // 幅を越えるほど巨大な場合：中央固定寄りに（暴走防止）
-    if (t.h*2 > BOARD_W - 2){
+    // 盤幅を越える巨大球は中央拘束（暴走防止）
+    if (t.h > MAX_R_FIT){
       t.x = (LEFT+RIGHT)/2;
       t.vx = 0;
     }else{
@@ -397,7 +387,7 @@ const CONFIG = {
         for (let j=i+1;j<tiles.length;j++){
           const A=tiles[i], B=tiles[j];
           const dx=B.x-A.x, dy=B.y-A.y;
-          let dist = Math.hypot(dx,dy);
+          const dist = Math.hypot(dx,dy);
           const minDist = A.h + B.h;
           const overlap = minDist - dist;
           if (overlap>0){
@@ -421,18 +411,20 @@ const CONFIG = {
       for (const t of tiles) keepInside(t);
     }
   }
-  function relaxWorld(n=4){ for(let i=0;i<n;i++) resolvePairs(); }
+  const relaxWorld = (n=4)=>{ for(let i=0;i<n;i++) resolvePairs(); };
 
-  // ===== step =====
+  // ===== physics step =====
   function step(dt){
     gameTime += dt;
     cooldown = Math.max(0, cooldown-dt);
 
     const breeze = BREEZE.amp * Math.sin(gameTime*BREEZE.speed);
 
+    // integrate
     for (const t of tiles){
       t.vy += G*dt;
 
+      // belts（円の底が帯の範囲なら）
       const bottom = t.y + t.h;
       for (const b of BELTS){
         if (bottom > b.y - b.t && bottom < b.y + b.t){
@@ -441,8 +433,10 @@ const CONFIG = {
         }
       }
 
+      // breeze
       t.vx += breeze * dt * 0.12;
 
+      // damping
       t.vx *= AIR_FRICTION; t.vy *= AIR_FRICTION;
       t.vx = clamp(t.vx, -VX_MAX, VX_MAX);
       t.vy = clamp(t.vy, -VY_MAX, VY_MAX);
@@ -451,18 +445,22 @@ const CONFIG = {
 
       keepInside(t);
 
+      // 小さな傾き（演出用）
       const target = clamp(t.vx/620, -ROT_MAX, ROT_MAX);
       t.rot += (target - t.rot) * 0.12;
     }
 
     resolvePairs();
 
+    // merges
     let changed, pass=0; do{ changed = tryMerges(); pass++; } while(changed && pass<16);
     if (changed) relaxWorld(4);
 
+    // fx
     for (const r of rings){ r.t += dt; }
     rings = rings.filter(r=>r.t<0.9);
 
+    // game over
     const AGE_SAFE = 0.45, MARGIN = 1;
     let danger=false;
     for (const t of tiles){
@@ -473,15 +471,9 @@ const CONFIG = {
     if (dangerTime > 0.70 && !over){ over=true; toast('GAME OVER! 元に戻す or リセット'); }
   }
 
-  // ===== merge =====
-  function touchingSmall(a,b){
-    const d = Math.hypot(b.x-a.x, b.y-a.y);
-    return d <= (a.h + b.h + CONTACT_TOL_SMALL);
-  }
-  function contactBig(a,b){
-    const d = Math.hypot(b.x-a.x, b.y-a.y);
-    return d <= (a.h + b.h + BIG_MERGE_TOL);
-  }
+  // ===== merging rules（円距離） =====
+  const touchingSmall = (a,b)=> Math.hypot(b.x-a.x, b.y-a.y) <= (a.h + b.h + CONTACT_TOL_SMALL);
+  const contactBig   = (a,b)=> Math.hypot(b.x-a.x, b.y-a.y) <= (a.h + b.h + BIG_MERGE_TOL);
 
   function tryMerges(){
     let changed=false;
@@ -505,7 +497,7 @@ const CONFIG = {
     }
     if (removedBig.size){ tiles = tiles.filter(t=>!removedBig.has(t.id)); updateHUD(); }
 
-    // 小オーブ：合計=10
+    // 小オーブ：合計=10（2〜6個、同フレーム複数）
     const small = tiles.filter(t=>t.val<10);
     if (small.length){
       const adj = small.map(()=>[]);
@@ -518,6 +510,7 @@ const CONFIG = {
 
       for (let s=0;s<small.length;s++){
         if (visited[s]) continue;
+        // 一つの連結成分ごとに10になる組合せを貪欲+DFSで抽出
         const comp=[]; const q=[s]; visited[s]=true;
         while(q.length){ const v=q.shift(); comp.push(v); for (const nb of adj[v]) if(!visited[nb]){visited[nb]=true;q.push(nb);} }
         if (comp.length<2) continue;
@@ -542,12 +535,16 @@ const CONFIG = {
             }
             return dfs(0,k,0,[]) ? res : null;
           }
+
           for (const k of [2,3,4,5,6]){ if (avail.length>=k){ const res=findK(k); if (res){ picked=res; break; } } }
+
           if (picked){
             chosenSets.push(picked);
             const setPicked = new Set(picked);
             avail = avail.filter(i=>!setPicked.has(i));
-          }else break;
+          }else{
+            break;
+          }
         }
 
         for (const picked of chosenSets){
@@ -571,10 +568,11 @@ const CONFIG = {
         updateHUD();
       }
     }
+
     return changed;
   }
 
-  // ===== rendering (Runway) =====
+  // ===== rendering =====
   function draw(){
     ctx.clearRect(0,0,W,H);
 
@@ -587,22 +585,23 @@ const CONFIG = {
     ctx.rect(BOARD_LEFT, BOARD_TOP, BOARD_RIGHT-BOARD_LEFT, BOARD_BOTTOM-BOARD_TOP);
     ctx.clip();
 
-    // コンベア帯（より繊細に）
+    // コンベア帯
     for (const b of BELTS) drawBelt(b.y, b.t, b.v>0?1:-1);
 
     // 赤線
     ctx.strokeStyle = 'rgba(226,78,82,.65)';
     ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(LEFT, CEIL); ctx.lineTo(RIGHT, CEIL); ctx.stroke(); ctx.setLineDash([]);
 
-    // ゴースト
+    // ゴースト（巨大球は中央表示）
     const rN = halfFor(nextQ[0]);
-    const ax = (rN > (BOARD_W-4)/2) ? (LEFT+RIGHT)/2 : clamp(aimX, LEFT+rN+1, RIGHT-rN-1);
+    const MAX_R_FIT = (BOARD_W - 4)/2;
+    const ax = (rN > MAX_R_FIT) ? (LEFT+RIGHT)/2 : clamp(aimX, LEFT+rN+1, RIGHT-rN-1);
     ctx.globalAlpha=.26; drawOrb(ax, CEIL-28, rN, nextQ[0], 0); ctx.globalAlpha=1;
 
     // オーブ
     for (const t of tiles) drawOrb(t.x,t.y,t.h,t.val,t.rot);
 
-    // 合体リング（繊細な円）
+    // 合体リング
     for (const rr of rings){
       ctx.globalAlpha = Math.max(0, 1 - rr.t*1.1);
       ctx.strokeStyle = rr.col; ctx.lineWidth = 2.2;
@@ -653,11 +652,10 @@ const CONFIG = {
     ctx.strokeStyle='rgba(0,0,0,.14)'; ctx.lineWidth=1.8;
     ctx.beginPath(); ctx.arc(0,0,r-0.6,0,Math.PI*2); ctx.stroke();
 
-    // 数字（Didone系優先）
+    // 数字（Didone系）
     ctx.textAlign='center'; ctx.textBaseline='middle';
     const fontPx = Math.floor(r*1.12);
     ctx.font = '700 '+fontPx+'px "Bodoni Moda","Didot","Times New Roman",serif';
-    // 細い白縁で読みやすく
     ctx.lineWidth = Math.max(1.8, r*0.16);
     ctx.strokeStyle = 'rgba(255,255,255,0.92)';
     ctx.strokeText(val, 0, 1);
@@ -677,8 +675,8 @@ const CONFIG = {
     ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
   }
 
-  // ===== main =====
-  function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 1300); }
+  // ===== main loop =====
+  const toast = (msg)=>{ toastEl.textContent=msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 1300); };
   let acc=0, last=performance.now();
   function loop(now){
     const dt = (now-last)/1000; last=now; acc += dt;
@@ -693,11 +691,11 @@ const CONFIG = {
 })();
 </script>
 
-<!-- Service Worker（オフライン対応・動的生成） -->
+<!-- Service Worker（オフライン対応・動的生成 / キャッシュ名更新） -->
 <script>
 if ('serviceWorker' in navigator) {
   const code = `
-    const CACHE='10game-decamerge-runway-v51';
+    const CACHE='10game-decamerge-runway-v52-fix';
     self.addEventListener('install',e=>{
       e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
       self.skipWaiting();
