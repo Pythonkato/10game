@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>10 Game — DecaMerge (Runway v5.2-fixed)</title>
+<title>10 Game — DecaMerge (Circles) v5.3-noBelts</title>
 <meta name="theme-color" content="#F6F5F3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,7 +12,7 @@
 <!-- Manifest (inline) -->
 <script type="application/manifest+json">
 {
-  "name": "10 Game — DecaMerge (Runway)",
+  "name": "10 Game — DecaMerge (Circles)",
   "short_name": "10 Game",
   "start_url": ".",
   "display": "standalone",
@@ -26,15 +26,20 @@
 
 <style>
   :root{
-    /* Paris Runway palette */
+    /* Runway-ish palette */
     --bg:#F6F5F3; --paper:#FFFFFF; --ink:#111; --muted:#6D6D70; --line:#E6E3DE; --chip:#FCFAF7;
 
-    /* 1〜9：上品なニュートラル */
+    /* 小オーブ(1〜9)の塗り色（見分けやすい落ち着きトーン） */
     --n1:#D39F8A; --n2:#D7B18A; --n3:#D9C78A; --n4:#AFC7B7; --n5:#BFD5E8;
     --n6:#AEBEE0; --n7:#C2B6DE; --n8:#D9A8C6; --n9:#C6B18B;
 
-    /* 10+：モノトーン階調 */
+    /* 大オーブ(10+)の塗り色（控えめグレイ） */
     --b10:#2E2E2E; --b20:#3A3A3A; --b40:#4A4A4A; --b80:#595959; --b160:#6A6A6A; --b320:#7B7B7B; --b640:#8C8C8C;
+
+    /* ★ 数字（文字）の色を値ごとに：強めの色相で差別化 */
+    --t1:#D94E41; --t2:#DE7B3B; --t3:#D9B12F; --t4:#2F9E7E; --t5:#3A83D6;
+    --t6:#5C6CD8; --t7:#8F68D6; --t8:#D954A7; --t9:#A8793A;
+    --t10:#0F7A55; --t20:#0A6CAA; --t40:#5B4BD1; --t80:#C23A6E; --t160:#B06E1F; --t320:#2A66C6; --t640:#248D5B; --t1280:#0E4F8E;
   }
   *{box-sizing:border-box}
   html,body{
@@ -97,7 +102,7 @@
   <header>
     <div class="brand">
       <div class="ttl">10 GAME</div>
-      <div class="sub">DecaMerge — Circles + Belts / Runway</div>
+      <div class="sub">DecaMerge — Circles</div>
     </div>
     <div class="chips">
       <div class="chip">Score: <b id="score">0</b> / Best: <b id="best">0</b></div>
@@ -119,7 +124,7 @@
 
   <footer>
     指で<strong>左右にスライド</strong>→<strong>指を離す</strong>で投入。<br>
-    <b>1〜9</b>は<strong>合計=10</strong>で合体（2〜6個／複数同時）。<b>同じ大オーブ</b>は<b>倍々合体</b>。
+    <b>1〜9</b>は<strong>合計=10</strong>で合体（2〜6個／複数同時OK）。<b>同じ大オーブ</b>は<b>倍々合体</b>。
   </footer>
 </div>
 
@@ -131,7 +136,6 @@
       <li>狙って左右にスライド → 指を離すと投入。</li>
       <li><strong>1〜9</strong>の隣接グループで<strong>合計=10</strong>なら即「10」に合体（2〜6個／複数同時OK）。</li>
       <li><strong>10,20,40…</strong>は<strong>同値接触</strong>で<strong>倍々合体</strong>。</li>
-      <li>盤面にはコンベア帯（→/←）と弱いそよ風があります。</li>
       <li>赤線より上に一定時間あると<b>ゲームオーバー</b>（投入直後0.45秒は無視）。</li>
     </ol>
     <div class="actions">
@@ -146,17 +150,18 @@
 <script>
 /* =========================
    実比率（面積 ∝ 値 ⇒ 直径 ∝ √値）＋自動スケール
-   - 1280 が盤面に必ず収まるよう S を自動調整
-   - 巨大球の投下＆境界処理を堅牢化
+   - 1280 が盤面に収まるよう SCALE10 を自動調整
+   - 1〜5 は“元の見やすさ相当”まで数字フォントを底上げ
+   - ベルト関連は完全削除
    ========================= */
 const CONFIG = {
   spawnWeights: { 1:6, 2:8, 3:11, 4:13, 5:15, 6:0, 7:0, 8:0, 9:0 },
-  baseDFor10: 56,      // デフォルト基準（後で自動補正されることがあります）
-  maxRank: 1280,       // 想定最大（ここまでが盤面に収まるようにスケール）
-  marginForMax: 8      // 盤内に残す余白（px）
+  baseDFor10: 56,     // 基準（あとで最大値に合わせて自動補正）
+  maxRank: 1280,      // ここまでが盤面に入るよう補正
+  marginForMax: 8     // 最大球用の余白(px)
 };
 
-/* 重みテーブルからランダムピッカー */
+/* ランダム抽選 */
 function makeRandomPicker(weights){
   const table = []; let total = 0;
   for (let v=1; v<=9; v++){ const w = Math.max(0, Number(weights[v] ?? 0)); table.push({v, w}); total += w; }
@@ -199,7 +204,7 @@ const randSmall = ()=> pickSmall();
   const BOARD_TOP = 6, BOARD_LEFT = LEFT, BOARD_RIGHT = RIGHT, BOARD_BOTTOM = FLOOR;
   const BOARD_W = RIGHT - LEFT;
 
-  const DT = 1/60, SUBSTEPS = 3, ITER = 4;  // ITERを少し増やして安定化
+  const DT = 1/60, SUBSTEPS = 3, ITER = 4;
   const G = 1850;
   const AIR_FRICTION = 0.975;
   const REST_FLOOR = 0.08;
@@ -209,19 +214,10 @@ const randSmall = ()=> pickSmall();
   const MAX_TILES  = 95;
   const ROT_MAX = 0.11;
 
-  // Belts & Breeze
-  const BELTS = [
-    { y: 200, t: 12, v: +160 },
-    { y: 340, t: 12, v: -160 },
-    { y: 480, t: 12, v: +180 },
-  ];
-  const BREEZE = { amp: 110, speed: 0.7 };
-
   // ===== dynamic scale for real ratios =====
   let SCALE10 = CONFIG.baseDFor10;   // d for value=10
   (function computeAutoScale(){
-    // 1280 の直径が盤面（−余白）に収まるよう補正
-    const allowed = BOARD_W - CONFIG.marginForMax;
+    const allowed = BOARD_W - CONFIG.marginForMax;               // 盤面許容直径
     const d1280 = SCALE10 * Math.sqrt(CONFIG.maxRank/10);
     if (d1280 > allowed && d1280 > 0){
       const k = allowed / d1280;
@@ -257,8 +253,19 @@ const randSmall = ()=> pickSmall();
     if (v>=20)  return CSS('--b20');
     return CSS('--b10');
   }
+  function digitColor(val){
+    if (val<=9) return CSS('--t'+val);
+    if (val>=1280) return CSS('--t1280');
+    if (val>=640)  return CSS('--t640');
+    if (val>=320)  return CSS('--t320');
+    if (val>=160)  return CSS('--t160');
+    if (val>=80)   return CSS('--t80');
+    if (val>=40)   return CSS('--t40');
+    if (val>=20)   return CSS('--t20');
+    return CSS('--t10');
+  }
 
-  // 実比率：直径 d = SCALE10 * √(val/10) （上限なしだが1280は盤面に収まるようSCALE10が自動調整済み）
+  // 実比率：直径 d = SCALE10 * √(val/10)
   function halfFor(val){
     const d = SCALE10 * Math.sqrt(Math.max(val,1)/10);
     return d/2;
@@ -268,9 +275,9 @@ const randSmall = ()=> pickSmall();
   function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
   function updateHUD(){
     scoreEl.textContent = score|0;
-    const best = +(localStorage.getItem('decamerge_best_circle_belt_runway_v52')||0);
-    if (score>best) localStorage.setItem('decamerge_best_circle_belt_runway_v52', score|0);
-    bestEl.textContent = localStorage.getItem('decamerge_best_circle_belt_runway_v52')||0;
+    const best = +(localStorage.getItem('decamerge_best_circle_nobelts_v53')||0);
+    if (score>best) localStorage.setItem('decamerge_best_circle_nobelts_v53', score|0);
+    bestEl.textContent = localStorage.getItem('decamerge_best_circle_nobelts_v53')||0;
     nextAEl.textContent = nextQ[0];
     nextBEl.textContent = nextQ[1];
     hintBtn.textContent = showHint ? 'ヒント OFF' : 'ヒント ON';
@@ -289,8 +296,8 @@ const randSmall = ()=> pickSmall();
   okHelp.addEventListener('click', closeHelpModal);
   helpModal.addEventListener('click', (e)=>{ if (e.target===helpModal) closeHelpModal(); });
   addEventListener('keydown', (e)=>{ if (e.key==='Escape' && helpOpen) closeHelpModal(); });
-  if (!localStorage.getItem('decamerge_seen_help_circlebelt_runway_v52')) {
-    openHelp(); localStorage.setItem('decamerge_seen_help_circlebelt_runway_v52','1');
+  if (!localStorage.getItem('decamerge_seen_help_circle_nobelts_v53')) {
+    openHelp(); localStorage.setItem('decamerge_seen_help_circle_nobelts_v53','1');
   }
 
   // ===== pointer inputs =====
@@ -366,8 +373,7 @@ const randSmall = ()=> pickSmall();
 
     // 盤幅を越える巨大球は中央拘束（暴走防止）
     if (t.h > MAX_R_FIT){
-      t.x = (LEFT+RIGHT)/2;
-      t.vx = 0;
+      t.x = (LEFT+RIGHT)/2; t.vx = 0;
     }else{
       if (t.x - t.h < LEFT+BOUND_SLOP){ t.x = LEFT+BOUND_SLOP + t.h; t.vx = Math.max(t.vx,0)*(-REST_WALL); }
       if (t.x + t.h > RIGHT-BOUND_SLOP){ t.x = RIGHT-BOUND_SLOP - t.h; t.vx = -Math.max(-t.vx,0)*REST_WALL; }
@@ -418,25 +424,11 @@ const randSmall = ()=> pickSmall();
     gameTime += dt;
     cooldown = Math.max(0, cooldown-dt);
 
-    const breeze = BREEZE.amp * Math.sin(gameTime*BREEZE.speed);
-
     // integrate
     for (const t of tiles){
       t.vy += G*dt;
 
-      // belts（円の底が帯の範囲なら）
-      const bottom = t.y + t.h;
-      for (const b of BELTS){
-        if (bottom > b.y - b.t && bottom < b.y + b.t){
-          t.vx += b.v * dt * 0.9;
-          t.vx *= 0.992;
-        }
-      }
-
-      // breeze
-      t.vx += breeze * dt * 0.12;
-
-      // damping
+      // 速度制限・減衰
       t.vx *= AIR_FRICTION; t.vy *= AIR_FRICTION;
       t.vx = clamp(t.vx, -VX_MAX, VX_MAX);
       t.vy = clamp(t.vy, -VY_MAX, VY_MAX);
@@ -445,7 +437,7 @@ const randSmall = ()=> pickSmall();
 
       keepInside(t);
 
-      // 小さな傾き（演出用）
+      // 演出用のごく小さな回転
       const target = clamp(t.vx/620, -ROT_MAX, ROT_MAX);
       t.rot += (target - t.rot) * 0.12;
     }
@@ -497,7 +489,7 @@ const randSmall = ()=> pickSmall();
     }
     if (removedBig.size){ tiles = tiles.filter(t=>!removedBig.has(t.id)); updateHUD(); }
 
-    // 小オーブ：合計=10（2〜6個、同フレーム複数）
+    // 小オーブ：合計=10
     const small = tiles.filter(t=>t.val<10);
     if (small.length){
       const adj = small.map(()=>[]);
@@ -510,7 +502,6 @@ const randSmall = ()=> pickSmall();
 
       for (let s=0;s<small.length;s++){
         if (visited[s]) continue;
-        // 一つの連結成分ごとに10になる組合せを貪欲+DFSで抽出
         const comp=[]; const q=[s]; visited[s]=true;
         while(q.length){ const v=q.shift(); comp.push(v); for (const nb of adj[v]) if(!visited[nb]){visited[nb]=true;q.push(nb);} }
         if (comp.length<2) continue;
@@ -535,16 +526,12 @@ const randSmall = ()=> pickSmall();
             }
             return dfs(0,k,0,[]) ? res : null;
           }
-
           for (const k of [2,3,4,5,6]){ if (avail.length>=k){ const res=findK(k); if (res){ picked=res; break; } } }
-
           if (picked){
             chosenSets.push(picked);
             const setPicked = new Set(picked);
             avail = avail.filter(i=>!setPicked.has(i));
-          }else{
-            break;
-          }
+          }else{ break; }
         }
 
         for (const picked of chosenSets){
@@ -585,9 +572,6 @@ const randSmall = ()=> pickSmall();
     ctx.rect(BOARD_LEFT, BOARD_TOP, BOARD_RIGHT-BOARD_LEFT, BOARD_BOTTOM-BOARD_TOP);
     ctx.clip();
 
-    // コンベア帯
-    for (const b of BELTS) drawBelt(b.y, b.t, b.v>0?1:-1);
-
     // 赤線
     ctx.strokeStyle = 'rgba(226,78,82,.65)';
     ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(LEFT, CEIL); ctx.lineTo(RIGHT, CEIL); ctx.stroke(); ctx.setLineDash([]);
@@ -622,21 +606,7 @@ const randSmall = ()=> pickSmall();
     }
   }
 
-  function drawBelt(y, t, dir){
-    ctx.fillStyle = 'rgba(0,0,0,0.03)';
-    ctx.fillRect(LEFT+1, y-t, RIGHT-LEFT-2, t*2);
-    ctx.save(); ctx.translate(0, y);
-    ctx.fillStyle = 'rgba(0,0,0,0.10)';
-    for (let x=LEFT+14; x<RIGHT-14; x+=30){
-      ctx.beginPath();
-      if (dir>0){ ctx.moveTo(x-6, -3); ctx.lineTo(x+6, 0); ctx.lineTo(x-6, 3); }
-      else      { ctx.moveTo(x+6, -3); ctx.lineTo(x-6, 0); ctx.lineTo(x+6, 3); }
-      ctx.closePath(); ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  // “Runway”質感のオーブ（モノトーン／ハイライト最小）
+  // ★ 数字カラー化＋小値フォントの底上げ
   function drawOrb(x,y,r,val,rot){
     ctx.save(); ctx.translate(x,y); ctx.rotate(rot||0);
 
@@ -654,16 +624,29 @@ const randSmall = ()=> pickSmall();
 
     // 数字（Didone系）
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    const fontPx = Math.floor(r*1.12);
+
+    // 通常は r*1.12。★1〜5は“元の見え方”相当まで底上げ
+    // 参考：旧v5.0の基準直径=56 → 参照半径 r_ref = 56*√(val/10)/2
+    const REF_D10 = 56;
+    const r_ref = (REF_D10 * Math.sqrt(Math.max(val,1)/10)) / 2;
+    let fontPx = Math.floor(r*1.12);
+    if (val <= 5){
+      const legacy = Math.floor(r_ref*1.16);
+      fontPx = Math.max(fontPx, legacy, 18); // 最低18pxは確保
+    }
     ctx.font = '700 '+fontPx+'px "Bodoni Moda","Didot","Times New Roman",serif';
+
+    // 読みやすさの白縁
     ctx.lineWidth = Math.max(1.8, r*0.16);
     ctx.strokeStyle = 'rgba(255,255,255,0.92)';
     ctx.strokeText(val, 0, 1);
-    ctx.fillStyle='#111';
+
+    // 値ごとに数字色を変える（要望）
+    ctx.fillStyle = digitColor(val) || '#111';
     ctx.fillText(val, 0, 1);
 
     if (showHint && val<10){
-      ctx.fillStyle='rgba(0,0,0,.34)'; ctx.font=Math.floor(r*0.58)+'px ui-sans-serif, "Noto Sans JP"';
+      ctx.fillStyle='rgba(0,0,0,.34)'; ctx.font=Math.floor(Math.max(fontPx*0.55, 14))+'px ui-sans-serif, "Noto Sans JP"';
       ctx.fillText(10-val, 0, -r*1.1);
     }
     ctx.restore();
@@ -691,11 +674,11 @@ const randSmall = ()=> pickSmall();
 })();
 </script>
 
-<!-- Service Worker（オフライン対応・動的生成 / キャッシュ名更新） -->
+<!-- Service Worker（オフライン対応・キャッシュ名更新） -->
 <script>
 if ('serviceWorker' in navigator) {
   const code = `
-    const CACHE='10game-decamerge-runway-v52-fix';
+    const CACHE='10game-decamerge-circle-v53-nobelts';
     self.addEventListener('install',e=>{
       e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])));
       self.skipWaiting();
